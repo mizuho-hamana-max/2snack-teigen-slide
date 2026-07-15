@@ -901,7 +901,10 @@ function downloadCopy(blob) {
 function saveHTML() {
   document.querySelectorAll('[contenteditable]').forEach(function(el){ el.removeAttribute('contenteditable'); });
   document.body.classList.remove('editing');
+  var activeSlideEl = document.querySelector('.slide.active');
+  document.querySelectorAll('.slide.active').forEach(function(el){ el.classList.remove('active'); });
   var html = '<!doctype html>\n' + document.documentElement.outerHTML;
+  if (activeSlideEl) activeSlideEl.classList.add('active');
   if (editMode) {
     document.querySelectorAll(EDITABLE).forEach(function(el){ el.contentEditable='true'; });
     document.body.classList.add('editing');
