@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snack全体の進め方と全体整理 — 社長提案 2026.07</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --ground: #F5F6FA;
+  --card: #FFFFFF;
+  --card-sunken: #FAFBFD;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --text-faint: #9CA3AF;
+  --border: #E2E4EB;
+
+  --pink: #F43F97;
+  --pink-soft: rgba(244,63,151,0.08);
+  --pink-border: rgba(244,63,151,0.28);
+
+  --blue: #2563EB;
+  --blue-soft: rgba(37,99,235,0.07);
+  --blue-border: rgba(37,99,235,0.25);
+
+  --orange: #EA580C;
+  --orange-soft: rgba(234,88,12,0.08);
+  --orange-border: rgba(234,88,12,0.26);
+
+  --green: #16A34A;
+  --green-soft: rgba(22,163,74,0.09);
+  --green-border: rgba(22,163,74,0.26);
+
+  --font: "Yu Gothic UI","Yu Gothic","Hiragino Kaku Gothic ProN","Hiragino Sans","Meiryo UI","Meiryo",system-ui,sans-serif;
+}
+
+html, body { width:100%; height:100%; overflow:hidden; background:var(--ground); color:var(--text); font-family:var(--font); font-feature-settings:"palt"; -webkit-font-smoothing:antialiased; }
+
+/* ── PROGRESS ── */
+.progress-bar { position:fixed; top:0; left:0; right:0; height:3px; z-index:100; background:var(--border); }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--pink),var(--blue)); transition:width .4s cubic-bezier(.4,0,.2,1); }
+
+/* ── DECK / SLIDE ── */
+.deck { position:relative; width:100vw; height:100vh; overflow:hidden; }
+.slide {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  padding:2.3rem 5.5% 1.4rem;
+  background:var(--ground);
+  opacity:0; transform:translateY(14px);
+  transition:opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+  --sa: var(--pink);
+}
+.slide.active { opacity:1; transform:translateY(0); pointer-events:auto; }
+.slide[data-accent="blue"] { --sa: var(--blue); }
+
+.slide-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.3rem; flex-shrink:0; }
+.eyebrow { font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--sa); }
+.counter { font-size:.7rem; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+
+.slide-body { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; overflow-y:auto; padding-right:.3rem; }
+
+.headline { font-size:clamp(1.4rem,2.7vw,2.05rem); font-weight:800; line-height:1.28; letter-spacing:-.02em; margin-bottom:.35rem; text-wrap:balance; }
+.hl { color:var(--sa); }
+.sub-headline { font-size:clamp(.78rem,1.1vw,.88rem); color:var(--text-muted); line-height:1.65; margin-bottom:1.1rem; max-width:46rem; }
+.divider { width:2.3rem; height:3px; background:var(--sa); border-radius:2px; margin:.75rem 0 1.1rem; flex-shrink:0; }
+
+.slide-nav { display:flex; justify-content:space-between; align-items:center; padding-top:.85rem; flex-shrink:0; border-top:1px solid var(--border); }
+.nav-btn { background:none; border:1.5px solid var(--border); color:var(--text-muted); padding:.36rem 1.05rem; border-radius:2rem; font-size:.74rem; cursor:pointer; font-family:var(--font); transition:border-color .2s, color .2s, background .2s; }
+.nav-btn:hover:not(:disabled) { border-color:var(--sa); color:var(--sa); background-color:color-mix(in srgb,var(--sa) 8%,transparent); }
+.nav-btn:disabled { opacity:.2; cursor:default; }
+
+/* ── TITLE SLIDE ── */
+.title-tag { display:inline-flex; align-items:center; font-size:.68rem; font-weight:700; letter-spacing:.13em; color:var(--pink); border:1.5px solid var(--pink-border); padding:.26rem .8rem; border-radius:2rem; margin-bottom:1.5rem; width:fit-content; }
+.title-main { font-size:clamp(1.9rem,4.4vw,3.4rem); font-weight:800; line-height:1.28; letter-spacing:-.03em; margin-bottom:1.2rem; }
+.title-sub { font-size:clamp(.82rem,1.3vw,.95rem); color:var(--text-muted); max-width:36rem; line-height:1.75; }
+.title-agenda { display:flex; gap:1.5rem; margin-top:1.6rem; }
+.title-agenda-item { flex:1; border:1.5px solid var(--border); border-radius:.8rem; padding:1rem 1.2rem; background:var(--card); }
+.title-agenda-num { font-size:.65rem; font-weight:800; color:var(--pink); letter-spacing:.08em; margin-bottom:.35rem; }
+.title-agenda-item strong { display:block; font-size:.9rem; margin-bottom:.2rem; }
+.title-agenda-item span { font-size:.76rem; color:var(--text-muted); }
+
+/* ── PART HEADER ROW ── */
+.part-tag { display:inline-flex; align-items:center; gap:.5rem; font-size:.66rem; font-weight:800; letter-spacing:.1em; padding:.24rem .75rem; border-radius:2rem; margin-bottom:.6rem; width:fit-content; }
+.part-tag.a { background:var(--pink); color:#fff; }
+.part-tag.b { background:none; border:1.5px dashed var(--blue-border); color:var(--blue); }
+
+/* ── generic card ── */
+.card { border:1.5px solid var(--border); border-radius:.8rem; padding:1rem 1.2rem; background:var(--card); }
+
+/* before/after */
+.transition { display:grid; grid-template-columns:1fr auto 1fr; gap:1rem; align-items:stretch; }
+.t-card { border:1.5px solid var(--border); border-radius:.85rem; padding:1.15rem 1.3rem; background:var(--card); }
+.t-card.old { opacity:.85; }
+.t-card.new { border-color:var(--pink-border); background:var(--pink-soft); }
+.t-label { font-size:.62rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.6rem; color:var(--text-faint); }
+.t-card.new .t-label { color:var(--pink); }
+.t-card p { font-size:.85rem; color:var(--text-muted); margin:0; line-height:1.7; }
+.t-arrow { display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:1.3rem; }
+
+/* flow 3-step */
+.flow3 { display:flex; align-items:center; gap:.5rem; margin:0 0 1.2rem; }
+.flow-step { flex:1; border:1.5px solid var(--border); border-radius:.8rem; background:var(--card); padding:1.1rem 1rem; text-align:center; }
+.flow-visual { height:2.6rem; display:flex; align-items:center; justify-content:center; margin-bottom:.7rem; }
+.flow-dots { display:flex; gap:.45rem; }
+.flow-dots span { width:.55rem; height:.55rem; border-radius:50%; background:var(--pink); opacity:.55; }
+.flow-dots span:nth-child(2) { opacity:.8; }
+.flow-dots span:nth-child(3) { opacity:1; }
+.flow-line { width:70%; height:2px; background:var(--pink); border-radius:2px; }
+.flow-shape { width:2.3rem; height:2.3rem; border:2.5px solid var(--pink); clip-path:polygon(50% 0%, 100% 100%, 0% 100%); }
+.flow-title { font-size:.86rem; font-weight:800; margin-bottom:.25rem; }
+.flow-desc { font-size:.72rem; color:var(--text-muted); line-height:1.5; }
+.flow-sep { color:var(--text-faint); font-size:1.05rem; flex:0 0 auto; }
+
+/* ── team trio (role assignment) ── */
+.trio-wrap { display:flex; flex-direction:column; align-items:center; gap:.9rem; }
+.trio { display:grid; grid-template-columns:repeat(3,1fr); gap:.85rem; width:100%; }
+.team-card { border:1.5px solid var(--border); border-radius:.8rem; padding:1rem 1.05rem; background:var(--card); border-top:3px solid var(--tc); }
+.team-card[data-team="sps"]  { --tc:var(--orange); }
+.team-card[data-team="plan"] { --tc:var(--pink); }
+.team-card[data-team="rd"]   { --tc:var(--blue); }
+.team-name-en { font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tc); margin-bottom:.28rem; }
+.team-name-ja { font-size:.94rem; font-weight:800; margin-bottom:.5rem; }
+.team-role { font-size:.78rem; color:var(--text-muted); line-height:1.6; }
+.hub-link { width:1.5px; height:1rem; background:var(--border); }
+.hub { border:1.5px dashed var(--border); border-radius:2rem; padding:.42rem 1.1rem; font-size:.74rem; color:var(--text-muted); background:var(--card-sunken); }
+.hub b { color:var(--text); font-weight:800; }
+
+/* ── timeline (進め方ステップ) ── */
+.timeline { display:flex; flex-direction:column; }
+.tl-step { display:flex; gap:.95rem; position:relative; padding-bottom:1.05rem; }
+.tl-step:last-child { padding-bottom:0; }
+.tl-num { width:1.7rem; height:1.7rem; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:.76rem; font-weight:800; color:var(--text-muted); background:var(--card); flex-shrink:0; z-index:1; font-variant-numeric:tabular-nums; }
+.tl-step.now .tl-num { border-color:var(--pink); color:var(--pink); background:var(--pink-soft); }
+.tl-step:not(:last-child)::before { content:""; position:absolute; left:.84rem; top:1.7rem; bottom:0; width:2px; background:var(--border); }
+.tl-content { padding-top:.12rem; }
+.tl-content strong { display:inline-flex; align-items:center; gap:.5rem; font-size:.86rem; }
+.tl-content span { display:block; font-size:.76rem; color:var(--text-muted); margin-top:.2rem; line-height:1.55; }
+.tl-now-badge { font-size:.6rem; font-weight:800; letter-spacing:.05em; padding:.14rem .55rem; border-radius:2rem; background:var(--pink); color:#fff; }
+
+/* table */
+.tbl-wrap { overflow-x:auto; border:1.5px solid var(--border); border-radius:.7rem; margin-bottom:.5rem; }
+table { width:100%; border-collapse:collapse; font-size:.82rem; }
+th, td { padding:.6rem .85rem; text-align:left; border-bottom:1px solid var(--border); vertical-align:top; }
+th { background:var(--card-sunken); font-weight:700; font-size:.74rem; color:var(--text-muted); }
+tr:last-child td { border-bottom:none; }
+
+/* ── photo slots (共通の画像プレースホルダー) ── */
+.photo-row { display:flex; gap:.7rem; margin-top:.9rem; }
+.photo-group { flex:1; border:1.5px solid var(--border); border-radius:.65rem; padding:.6rem .65rem; background:var(--card-sunken); }
+.photo-group-label { font-size:.7rem; font-weight:800; margin-bottom:.45rem; color:var(--text-muted); text-align:center; }
+.photo-slots { display:flex; gap:.4rem; }
+.photo-slot {
+  flex:1; aspect-ratio:1/1; min-width:0;
+  border:1.5px dashed #CBD5E1; border-radius:.5rem; background:var(--card);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem;
+  font-size:.62rem; color:var(--text-faint); cursor:pointer; overflow:hidden; text-align:center; padding:.2rem;
+  transition:border-color .2s, background .2s, color .2s;
+}
+.photo-slot:hover { border-color:var(--pink); background:var(--pink-soft); color:var(--pink); }
+.photo-slot img { width:100%; height:100%; object-fit:cover; }
+.ph-icon { font-size:1rem; line-height:1; }
+
+/* ── 表の列に揃える2カラム画像行 (A-2-1用) ── */
+.photo-align { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin:.6rem 0 .8rem; }
+.photo-align .photo-group { margin:0; }
+.photo-align .photo-slot { aspect-ratio:auto; height:3.6rem; }
+
+/* ── カタログ風2カラム構図 (A-2-2用、箱の入れ子をやめた版) ── */
+.catalog-2col { display:grid; grid-template-columns:1fr 1fr; gap:1.8rem; margin-top:.3rem; }
+.catalog-col { padding-top:.7rem; border-top:3px solid var(--lc); }
+.catalog-col[data-line="basic"] { --lc:var(--blue); }
+.catalog-col[data-line="premium"] { --lc:var(--pink); }
+.catalog-col-title { font-size:1rem; font-weight:800; color:var(--lc); margin-bottom:.15rem; }
+.catalog-line-desc { font-size:.72rem; color:var(--text-muted); margin-bottom:.9rem; }
+.catalog-cluster { margin-bottom:1rem; }
+.catalog-cluster:last-child { margin-bottom:0; }
+.catalog-cluster-label { font-size:.76rem; font-weight:700; color:var(--text-muted); margin-bottom:.5rem; }
+.catalog-tiles { display:flex; gap:.5rem; }
+.catalog-tiles .photo-slot { border-radius:.7rem; height:3.6rem; aspect-ratio:auto; flex:1; }
+
+/* ── lineup nested boxes (ベーシック/プレミアムライン全体像) ── */
+.lineup-outer { border:2px solid var(--blue-border); border-radius:.9rem; padding:.85rem; background:var(--blue-soft); margin-bottom:.7rem; }
+.lineup-outer.premium { border-color:var(--pink-border); background:var(--pink-soft); }
+.lineup-outer-label { font-size:.66rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:.55rem; }
+.lineup-outer.premium .lineup-outer-label { color:var(--pink); }
+.lineup-group { background:var(--card); border:1.5px solid var(--border); border-radius:.6rem; padding:.55rem .7rem; margin-bottom:.45rem; }
+.lineup-group:last-child { margin-bottom:0; }
+.lineup-group-label { font-size:.72rem; font-weight:700; color:var(--text-muted); margin-bottom:.4rem; }
+.lineup-group .photo-slot { aspect-ratio:1/1; }
+.lineup-group .photo-slots { gap:.35rem; }
+
+/* ── category diagram (おつまみ/お菓子×ベーシック/プレミアム) ── */
+.cat-diagram { display:flex; gap:1rem; margin:.9rem 0; }
+.cat-box { flex:1; border:2px solid var(--border); border-radius:.9rem; padding:1rem; background:var(--card); }
+.cat-box.otsumami { border-color:var(--blue-border); background:var(--blue-soft); }
+.cat-box.okashi { border-color:var(--pink-border); background:var(--pink-soft); }
+.cat-box-label { font-size:.8rem; font-weight:800; margin-bottom:.7rem; text-align:center; }
+.cat-chips { display:flex; flex-direction:column; gap:.5rem; }
+.cat-chip { padding:.5rem .8rem; border-radius:.6rem; font-size:.8rem; font-weight:700; text-align:center; background:var(--card); }
+.cat-chip.basic { border:1.5px solid var(--blue-border); color:var(--blue); }
+.cat-chip.premium { border:1.5px solid var(--pink-border); color:var(--pink); }
+.cat-chip.maybe { border:1.5px dashed var(--border); color:var(--text-faint); font-weight:600; }
+
+/* stat cards */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(13.5rem,1fr)); gap:.6rem; }
+.stat-card { border:1.5px solid var(--border); border-radius:.75rem; padding:.8rem .95rem; background:var(--card); border-top:3px solid var(--sc); }
+.stat-card.good { --sc:var(--green); }
+.stat-card.improve { --sc:var(--orange); }
+.stat-top { display:flex; align-items:baseline; gap:.4rem; margin-bottom:.4rem; flex-wrap:wrap; }
+.stat-num { font-size:1.25rem; font-weight:800; font-variant-numeric:tabular-nums; color:var(--sc); }
+.stat-num-sub { font-size:.66rem; color:var(--text-faint); font-variant-numeric:tabular-nums; }
+.stat-name { font-size:.82rem; font-weight:800; margin-bottom:.3rem; }
+.stat-desc { font-size:.74rem; color:var(--text-muted); line-height:1.55; }
+.split-row { display:flex; gap:1rem; margin-bottom:.4rem; }
+.split-item .sn { font-size:.95rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.split-item.pos .sn { color:var(--green); }
+.split-item.neg .sn { color:var(--orange); }
+
+/* quote / example */
+.quote { border-left:3px solid var(--blue-border); background:var(--blue-soft); border-radius:0 .6rem .6rem 0; padding:.75rem 1rem; margin:.6rem 0; }
+.quote-label { font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:.35rem; }
+.quote p { font-size:.8rem; color:var(--text); margin:0; line-height:1.65; }
+.example-card { border:1.5px solid var(--pink-border); background:var(--pink-soft); border-radius:.75rem; padding:.85rem 1.05rem; margin-top:.5rem; }
+.example-label { font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--pink); margin-bottom:.35rem; }
+.example-card p { font-size:.8rem; margin:0; line-height:1.65; }
+
+.note-badge { display:inline-flex; align-items:center; font-size:.66rem; font-weight:800; letter-spacing:.03em; padding:.22rem .65rem; border-radius:2rem; border:1.5px dashed var(--border); color:var(--text-muted); margin-bottom:.7rem; width:fit-content; }
+
+/* generic bullet list within slide */
+.sec-list { list-style:none; display:flex; flex-direction:column; gap:.45rem; }
+.sec-list li { font-size:.83rem; line-height:1.65; padding-left:1rem; position:relative; }
+.sec-list li::before { content:""; position:absolute; left:0; top:.58rem; width:.34rem; height:.34rem; border-radius:50%; background:var(--text-faint); }
+.arrow-line { font-size:.82rem; color:var(--text-muted); padding-left:1.05rem; position:relative; margin-top:.4rem; }
+.arrow-line::before { content:"→"; position:absolute; left:0; color:var(--sa); font-weight:700; }
+
+/* pattern cards (B section) */
+.pattern-card { border:1.5px solid var(--border); border-radius:.7rem; padding:.75rem .95rem; background:var(--card); margin-bottom:.5rem; }
+.pattern-num { font-size:.68rem; font-weight:800; color:var(--blue); margin-bottom:.3rem; letter-spacing:.03em; }
+.pattern-card p, .pattern-card { font-size:.82rem; line-height:1.6; }
+
+.summary-box { border:1.5px solid var(--pink-border); background:var(--pink-soft); border-radius:.7rem; padding:.85rem 1.05rem; margin-top:.6rem; }
+.summary-box .quote-label { color:var(--pink); }
+.summary-box p { font-size:.82rem; margin:0; line-height:1.65; }
+.summary-box ul { margin-top:.5rem; }
+
+.def-grid { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-top:.6rem; }
+.def-card { border:1.5px solid var(--border); border-radius:.7rem; padding:.8rem 1rem; background:var(--card); }
+.def-card.basic { border-top:3px solid var(--blue); }
+.def-card.premium { border-top:3px solid var(--pink); }
+.def-card .dn { font-size:.8rem; font-weight:800; margin-bottom:.35rem; }
+.def-card p { font-size:.76rem; color:var(--text-muted); margin:0; line-height:1.6; }
+
+/* checklist */
+.checklist { list-style:none; display:flex; flex-direction:column; gap:.55rem; }
+.checklist li { font-size:.86rem; padding-left:1.6rem; position:relative; }
+.checklist li::before { content:""; position:absolute; left:0; top:.15rem; width:1rem; height:1rem; border:1.5px solid var(--border); border-radius:.3rem; background:var(--card); }
+
+/* ── TOOLBAR / EDIT MODE ── */
+.toolbar { position:fixed; top:.6rem; right:1.1rem; z-index:200; display:flex; gap:.4rem; }
+.tb-btn { background:#fff; border:1.5px solid var(--border); color:var(--text-muted); padding:.26rem .85rem; border-radius:2rem; font-size:.7rem; cursor:pointer; font-family:var(--font); box-shadow:0 1px 5px rgba(0,0,0,.07); transition:border-color .2s, color .2s, background .2s; }
+.tb-btn:hover { border-color:var(--pink); color:var(--pink); }
+.tb-btn.on { border-color:var(--pink); color:var(--pink); background:var(--pink-soft); }
+
+body.editing [contenteditable="true"] { outline:1.5px dashed rgba(244,63,151,.35); border-radius:3px; min-width:1em; min-height:1em; cursor:text; }
+body.editing [contenteditable="true"]:hover { outline-color:rgba(244,63,151,.65); }
+body.editing [contenteditable="true"]:focus { outline:2px solid var(--pink); outline-offset:1px; background:rgba(244,63,151,.05); }
+
+#save-toast { position:fixed; bottom:1.7rem; left:50%; transform:translateX(-50%) translateY(8px); background:#1F2937; color:#fff; font-size:.76rem; padding:.48rem 1.5rem; border-radius:2rem; opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:300; white-space:nowrap; }
+#save-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media (prefers-reduced-motion:reduce) { .slide, .progress-fill { transition:none; } }
+
+@media (max-width:760px) {
+  .slide { padding:1.6rem 5% 1.1rem; }
+  .transition { grid-template-columns:1fr; }
+  .t-arrow { transform:rotate(90deg); }
+  .flow3 { flex-direction:column; }
+  .flow-sep { transform:rotate(90deg); }
+  .trio { grid-template-columns:1fr; }
+  .def-grid { grid-template-columns:1fr; }
+  .cat-diagram { flex-direction:column; }
+  .photo-row { flex-direction:column; }
+  .title-agenda { flex-direction:column; }
+}
+</style>
+</head>
+<body class="">
+<div class="toolbar">
+  <button id="edit-btn" class="tb-btn" onclick="toggleEditMode()">✏️ 編集</button>
+  <button class="tb-btn" onclick="saveHTML()">💾 保存</button>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width: 28.6%;"></div></div>
+<div class="deck" id="deck">
+
+<!-- 0. TITLE -->
+<div class="slide" data-idx="0">
+  <div class="slide-top"><span class="eyebrow">SNACK戦略</span><span class="counter">1 / 21</span></div>
+  <div class="slide-body">
+    <div class="title-tag">社長提案　2026.07</div>
+    <div class="title-main">Snack全体の<br><span style="color:var(--pink)">進め方</span>と<span style="color:var(--blue)">全体整理</span></div>
+    <div class="title-sub">今日話したいことは大きく2つ。1つはSnack全体の進め方、もう1つはSnack全体の整理（現状のラインの整理と、今後の商品開発をどこへ進めるか）。</div>
+    <div class="title-agenda">
+      <div class="title-agenda-item">
+        <div class="title-agenda-num">1. 進め方</div>
+        <strong>プロダクトアウトからマーケットインへ</strong>
+        <span>R&amp;D・SPS・プランニングチームでPDCAを回す体制へ</span>
+      </div>
+      <div class="title-agenda-item">
+        <div class="title-agenda-num">2. 全体整理</div>
+        <strong>Snackラインナップの整理と方向性</strong>
+        <span>商談議事録データをもとに、今後どこへ進めるかを整理</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 1. A-1a これまで→今 -->
+<div class="slide" data-idx="1">
+  <div class="slide-top"><span class="eyebrow">A-1　Snack全体の進め方</span><span class="counter">2 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">プロダクトアウトから、<br>マーケットインへ</div>
+    <div class="divider"></div>
+    <div class="transition">
+      <div class="t-card old">
+        <div class="t-label">これまで — プロダクトアウト</div>
+        <p>実績となる商品がまだなかったため、R&amp;Dが「これが売れるのではないか」という予測のもとで商品を開発・販売してきた。</p>
+      </div>
+      <div class="t-arrow">→</div>
+      <div class="t-card new">
+        <div class="t-label">今 — 実績とお客様の反応が見えてきた段階</div>
+        <p>実際に販売してみて、お客様の反応や業績といったものが出てきている状態。今後はこの状況をキャッチアップしながら、<strong>R&amp;D・SPS・プランニングチーム全体でマーケットインの商品開発</strong>を行い、PDCAをちゃんと回していく。</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 2. A-1b 点→線→図形 -->
+<div class="slide" data-idx="2">
+  <div class="slide-top"><span class="eyebrow">A-1　Snack全体の進め方</span><span class="counter">3 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">「点」から「線」、<br>そして「図形」へ</div>
+    <div class="sub-headline">これまでは商品を単発（点）で開発してきた流れになっていた。今後はこれを線としてちゃんとつなぎ、さらに引きで見て全体がどういう図形（構造）として見えるかを確認しながら商品開発を進めていきたい。</div>
+    <div class="flow3">
+      <div class="flow-step">
+        <div class="flow-visual"><div class="flow-dots"><span></span><span></span><span></span></div></div>
+        <div class="flow-title">点（これまで）</div>
+        <div class="flow-desc">商品を単発で開発・販売</div>
+      </div>
+      <div class="flow-sep">→</div>
+      <div class="flow-step">
+        <div class="flow-visual"><div class="flow-line"></div></div>
+        <div class="flow-title">線</div>
+        <div class="flow-desc">ジャンルごとの統一感</div>
+      </div>
+      <div class="flow-sep">→</div>
+      <div class="flow-step">
+        <div class="flow-visual"><div class="flow-shape"></div></div>
+        <div class="flow-title">図形</div>
+        <div class="flow-desc">2snack全体での立ち位置、整理</div>
+      </div>
+    </div>
+    <p class="arrow-line" style="margin-top:.9rem;">例：販売後3ヶ月・6ヶ月時点の目標数値に対する検証、お客様の声を踏まえた改善のサイクルを回す</p>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 3. A-1c 役割分担 -->
+<div class="slide" data-idx="3">
+  <div class="slide-top"><span class="eyebrow">A-1　Snack全体の進め方</span><span class="counter">4 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">役割分担 — 3チーム体制</div>
+    <div class="sub-headline">特定の一人の判断に頼るのではなく、3チームがそれぞれの持ち場からデータを持ち寄り、開発判断を共有する。</div>
+    <div class="trio-wrap">
+      <div class="trio">
+        <div class="team-card" data-team="sps">
+          <div class="team-name-en">SPS</div>
+          <div class="team-name-ja">営業・現場の声をヒアリングする</div>
+          <div class="team-role">販売実績（POSデータ）と、バイヤー・店頭からの声を現場から集める</div>
+        </div>
+        <div class="team-card" data-team="plan">
+          <div class="team-name-en">Planning Team</div>
+          <div class="team-name-ja">企画・進捗管理・実績分析</div>
+          <div class="team-role">全体整理・仮説設計を行い、集まったデータをもとに判断基準を運用する旗振り役</div>
+        </div>
+        <div class="team-card" data-team="rd">
+          <div class="team-name-en">R&amp;D</div>
+          <div class="team-name-ja">商品開発</div>
+          <div class="team-role">試作・商品化。実際のモノづくりを行う</div>
+        </div>
+      </div>
+      <div class="hub-link"></div>
+      <div class="hub"><br></div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 4. A-1d 具体的な進め方 -->
+<div class="slide" data-idx="4">
+  <div class="slide-top"><span class="eyebrow">A-1　Snack全体の進め方</span><span class="counter">5 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">具体的な進め方（ステップ）</div>
+    <div class="divider"></div>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-num">1</div>
+        <div class="tl-content"><strong>企画×商品開発チームで全体整理・論点をすり合わせる</strong><span>ベーシックライン／プレミアムラインの定義、SABLEの扱いなどの論点を確定する</span></div>
+      </div>
+      <div class="tl-step now">
+        <div class="tl-num">2</div>
+        <div class="tl-content"><strong>社長へ「進め方＋全体整理案」を提案 <span class="tl-now-badge">今ここ</span></strong><span>この場での提案。営業ヒアリングの前段として、方針の承認をもらう</span></div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-num">3</div>
+        <div class="tl-content"><strong>承認後、営業チームを交えてヒアリングを実施</strong><span>数値だけでなく、バイヤー・店頭の声も構造的に回収する</span></div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-num">4</div>
+        <div class="tl-content"><strong>データ・ヒアリング結果を全体整理に反映</strong><span>商品別・ライン別にPDCAシートを埋めていく</span></div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-num">5</div>
+        <div class="tl-content"><strong>ポートフォリオで俯瞰し、新商品提案へ</strong><span>実績と戦略適合度から次の開発の方向性を決める</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 5. A-2-1 位置づけ（+写真） -->
+<div class="slide active" data-idx="5">
+  <div class="slide-top"><span class="eyebrow">A-2-1　全社内での位置づけ</span><span class="counter">6 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">TWO FOODS全体における<br>Snackの位置づけ</div>
+    <div class="sub-headline">自社の主な商品は水・グミ・スナックの3つ。</div>
+    <div class="tbl-wrap" style="overflow:visible;">
+      <table>
+        <thead><tr><th></th><th>水・グミ</th><th>スナック</th></tr></thead>
+        <tbody>
+          <tr><td>お客様が魅力を感じる軸</td><td>栄養素・機能性（サプリメント要素）</td><td>味・新規性・独自性</td></tr>
+          <tr><td>重要な力</td><td>企画力</td><td>味特化のR&amp;D力</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="photo-align">
+      <div class="photo-group">
+        <div class="photo-group-label">水・グミ</div>
+        <div class="photo-slots">
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+        </div>
+      </div>
+      <div class="photo-group">
+        <div class="photo-group-label">スナック</div>
+        <div class="photo-slots">
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+        </div>
+      </div>
+    </div>
+    <ul class="sec-list">
+      <li>どちらも機能的価値＋情緒的価値の両方があるが、<strong>スナックは特に「味特化」が重要</strong></li>
+      <li>スナックで大事なのは、他商品との差別化・新規性・<strong>商品独自の「人格」</strong></li>
+      <li>自社にR&amp;Dチームがあるという強みは、まさにこのスナックカテゴリーで活かせる</li>
+    </ul>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 6. A-2-2 現行ラインナップ（カタログ風構図） -->
+<div class="slide" data-idx="6">
+  <div class="slide-top"><span class="eyebrow">A-2-2　現行ラインナップ</span><span class="counter">7 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">現行Snackラインナップ（全体像）</div>
+    <div class="divider"></div>
+    <div class="catalog-2col">
+      <div class="catalog-col" data-line="basic">
+        <div class="catalog-col-title">ベーシックライン</div>
+        <div class="catalog-line-desc">日常使い・手に取りやすい価格</div>
+        <div class="catalog-cluster">
+          <div class="catalog-cluster-label">CRISPY（4種）</div>
+          <div class="catalog-tiles">
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          </div>
+        </div>
+        <div class="catalog-cluster">
+          <div class="catalog-cluster-label">SABLE（クッキー・2種）</div>
+          <div class="catalog-tiles">
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="catalog-col" data-line="premium">
+        <div class="catalog-col-title">プレミアムライン</div>
+        <div class="catalog-line-desc">商品の「人格」・唯一無二の美味しさ</div>
+        <div class="catalog-cluster">
+          <div class="catalog-cluster-label">含浸チョコおかき（2種）</div>
+          <div class="catalog-tiles">
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          </div>
+        </div>
+        <div class="catalog-cluster">
+          <div class="catalog-cluster-label">ケーキラスク（3種）</div>
+          <div class="catalog-tiles">
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+            <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 7. A-2-3 good -->
+<div class="slide" data-idx="7">
+  <div class="slide-top"><span class="eyebrow">A-2-3　商談議事録から見えてきたこと</span><span class="counter">8 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">評価されている点</div>
+    <div class="sub-headline">分析対象：2024年6月〜2026年7月（25ヶ月）、全商談386件、うちクリスピー確定68件（17.6%）</div>
+    <div class="stat-grid">
+      <div class="stat-card good">
+        <div class="stat-name">健康訴求の設計思想</div>
+        <div class="stat-desc">「健康を前面に出さず美味しさ軸」という設計への共感（複数チャネルで一貫評価）</div>
+      </div>
+      <div class="stat-card good">
+        <div class="stat-top"><span class="stat-num">35.3%</span><span class="stat-num-sub">確定68件中24件</span></div>
+        <div class="stat-name">トリュフの安定性</div>
+        <div class="stat-desc">好評言及。JAL国際線ビジネスクラス採用実績もあり、現場での回転率も最高評価</div>
+      </div>
+      <div class="stat-card good">
+        <div class="stat-top"><span class="stat-num">11.4%</span><span class="stat-num-sub">全386件中44件</span></div>
+        <div class="stat-name">パッケージ・デザイン</div>
+        <div class="stat-desc">好評。プロトタイプ段階から一貫して「おしゃれ」「かわいい」と評価</div>
+      </div>
+      <div class="stat-card good">
+        <div class="stat-top"><span class="stat-num">15.0%</span><span class="stat-num-sub">確定商談では30.9%</span></div>
+        <div class="stat-name">実績・権威付け</div>
+        <div class="stat-desc">大型チャネル採用が言葉より強い説得材料になっている</div>
+      </div>
+      <div class="stat-card good">
+        <div class="stat-top"><span class="stat-num">16.6%</span><span class="stat-num-sub">確定68件中26件=38.2%</span></div>
+        <div class="stat-name">おつまみポジショニング</div>
+        <div class="stat-desc">酒類売場横での提案が採用突破口になっている</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 8. A-2-3 improve -->
+<div class="slide" data-idx="8">
+  <div class="slide-top"><span class="eyebrow">A-2-3　商談議事録から見えてきたこと</span><span class="counter">9 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">改善点</div>
+    <div class="divider"></div>
+    <div class="stat-grid">
+      <div class="stat-card improve">
+        <div class="stat-top"><span class="stat-num">21.0%</span><span class="stat-num-sub">最頻出課題</span></div>
+        <div class="stat-name">価格のばらつき</div>
+        <div class="stat-desc">198円／230円／248円とフレーバー間で不統一。通常価格帯（99〜150円）との割高感も</div>
+      </div>
+      <div class="stat-card improve">
+        <div class="stat-top"><span class="stat-num">19.2%</span></div>
+        <div class="stat-name">ロット・物流制約</div>
+        <div class="stat-desc">混載10ケースの最低ロットがテスト導入には過大。在庫滞留リスクが採用を鈍化させている</div>
+      </div>
+      <div class="stat-card improve">
+        <div class="stat-top"><span class="stat-num">15.5%</span><span class="stat-num-sub">確定商談では25.0%</span></div>
+        <div class="stat-name">専用棚がない・カテゴリー分断</div>
+        <div class="stat-desc">健康食品棚がなく通常菓子棚では埋もれる。洋風／和風でバイヤーが分かれる問題も</div>
+      </div>
+      <div class="stat-card improve">
+        <div class="stat-top"><span class="stat-num">4.4%</span></div>
+        <div class="stat-name">パッケージの情報伝達</div>
+        <div class="stat-desc">おしゃれさの裏返しで用途が伝わりにくく、背面を読まないと機能が不明瞭</div>
+      </div>
+      <div class="stat-card improve">
+        <div class="stat-name">ガーリックの評価分散</div>
+        <div class="split-row">
+          <div class="split-item pos"><div class="sn">好評11件(16.2%)</div></div>
+          <div class="split-item neg"><div class="sn">懸念3件(4.4%)</div></div>
+        </div>
+        <div class="stat-desc">駅ナカでは強いが女性客・オフィスでは敬遠されがち</div>
+      </div>
+      <div class="stat-card improve">
+        <div class="stat-top"><span class="stat-num">10.4%</span><span class="stat-num-sub">確定商談では22.1%</span></div>
+        <div class="stat-name">競合認知度の壁</div>
+        <div class="stat-desc">味・スコアで上回るも認知度差が採用判断を左右している</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 9. A-2-4 価格統一のみ -->
+<div class="slide" data-idx="9">
+  <div class="slide-top"><span class="eyebrow">A-2-4　価格統一</span><span class="counter">10 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">価格統一の必要性</div>
+    <div class="divider"></div>
+    <ul class="sec-list">
+      <li>今まで：製造上の限界に応じて商品ごとに価格帯が決まっていた</li>
+      <li>今後：<strong>カテゴリーごとに「この値段で作る」という目標数値を先に決め</strong>、そこに合わせて商品を設計する必要がある</li>
+    </ul>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 10. A-2-5 カテゴリー分断の課題（独立ページ） -->
+<div class="slide" data-idx="10">
+  <div class="slide-top"><span class="eyebrow">A-2-5　カテゴリー分断</span><span class="counter">11 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">カテゴリー分断の課題</div>
+    <div class="divider"></div>
+    <ul class="sec-list">
+      <li>「スナック」と一括りにしていても、メーカーによっては洋風・和風、スナック系・洋菓子系・米菓系でバイヤーがそれぞれ分かれている</li>
+      <li>カテゴリーをまたいだ商品展開は営業しづらく、先方も採用しにくい（世界観として一貫した採用がされにくい）</li>
+    </ul>
+    <div class="quote">
+      <div class="quote-label">現場の経験から</div>
+      <p>成城石井は各店の担当者が自店に何をどれくらい発注して、どういう売り場を作るか決めて販売していく。ここで違うカテゴリーの商品と混在すると、店舗担当者同士で売り場の取り合いになり非常にやりにくい。ほかの企業はおせんべいのメーカーはおせんべいで多品種作ることが多いが、うちは様々な商品があることが強みでもあり、一方で他カテゴリーに分断しているがゆえに世界観を作りにくい現状にもつながっている。</p>
+    </div>
+    <p class="arrow-line">おつまみとして展開するなら「一つのバイヤー・一つの棚・一つの世界観」を作れる商品設計に、プレミアムラインとして展開するなら「洋菓子でまとめる」といった住み分けが今後は必要</p>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 11. A-2-6 パッケージ（明確化＋ミーノ事例） -->
+<div class="slide" data-idx="11">
+  <div class="slide-top"><span class="eyebrow">A-2-6　パッケージ</span><span class="counter">12 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">パッケージの評価と課題</div>
+    <div class="sub-headline">評価されているからといって、変えなくていいとは限らない。何が評価されていて、どこに改善余地があるのかを正確に分けて分析する必要がある。</div>
+    <div class="def-grid">
+      <div class="def-card basic">
+        <div class="dn">① 評価されている点</div>
+        <p>「おしゃれ」「健康を出しすぎずダサくない」という設計。ここは維持すべきポイント</p>
+      </div>
+      <div class="def-card premium">
+        <div class="dn">② 改善ポイント</div>
+        <p>「美味しそうに感じる」「手に取りたくなる」という要素が弱い。自社は味の評価自体は高いため、食べる前の"手に取られていない"ことが本質的な課題と考えられる</p>
+      </div>
+    </div>
+    <p class="arrow-line">売れない理由は大きく2パターン：パッケージの時点で手に取ってもらえていない／食べてみたが美味しくなくリピートされない。自社は前者が課題</p>
+    <div class="example-card">
+      <div class="example-label">共有：SPSからのヒアリング（ミーノの事例）</div>
+      <p>ミーノでもTWOと同じ課題が商談・ヒアリングで挙がっていると共有があった。ミーノは発売後「おつまみ」として売れるとわかり注力しているが、パッケージからおつまみであることが伝わりづらく、おつまみ棚に置かれにくいという課題があるそう。企業側は広告でおつまみとしての普及に力を入れているが、課題感は残っているとのこと。<br>→ TWOでも同様のフィードバックをもらうことが多いため、もう少し解像度を上げて精査する必要があると感じた（本日は共有のみ）</p>
+      <div class="photo-slots" style="margin-top:.65rem; max-width:16rem;">
+        <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span><span>商品写真</span></div>
+        <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span><span>PR画像</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 12. A-2-7 競合・認知度 -->
+<div class="slide" data-idx="12">
+  <div class="slide-top"><span class="eyebrow">A-2-7　競合・認知度</span><span class="counter">13 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">競合・認知度・ブランド力の壁</div>
+    <div class="divider"></div>
+    <ul class="sec-list">
+      <li>スナックというカテゴリーは「美味しそう」「気になる」で購入されるカテゴリーのため、商品独自の「人格」「他社にはない輝き」が重要</li>
+      <li>ファブレスの中でどこまでこの「人格の立つ商品」を作れるかがR&amp;Dの頑張りどころ</li>
+    </ul>
+    <div class="example-card">
+      <div class="example-label">例：グリコのチーザ・クラッツ</div>
+      <p>他にはない存在感があり、チーズだけで焼いたような食感・クリスピーな食感で商品としての人格が立っている。「ポテチの中でフレーバーを選ぶ」のではなく「チーザを買う」という選ばれ方をしている。</p>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 13. A-2-8 PDCA仕組み -->
+<div class="slide" data-idx="13">
+  <div class="slide-top"><span class="eyebrow">A-2-8　PDCAの仕組み</span><span class="counter">14 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">売って終わりにしない<br>仕組みの必要性</div>
+    <div class="divider"></div>
+    <ul class="sec-list">
+      <li>現状、販売した商品がそのまま「だだ流し」になってしまっている</li>
+      <li>回収・ブラッシュアップの視点が必要：うまくいった場合は横展開、うまくいかない場合はどこを改善すべきかのフィードバックを定点的に行う</li>
+      <li>どの商品から着手するかも含め、ここはもう少し時間をかけて詰める必要がある</li>
+    </ul>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 14. A-2-9 プラントベース -->
+<div class="slide" data-idx="14">
+  <div class="slide-top"><span class="eyebrow">A-2-9　プラントベース</span><span class="counter">15 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">プラントベース制約についての共有</div>
+    <span class="note-badge">今すぐ決定・変更したい話ではなく、共有事項</span>
+    <ul class="sec-list">
+      <li>プラントベースは現在「健康要素の一つ」という立ち位置になっているが、この制約が開発の足かせになっている場面が多い</li>
+      <li>例：サワークリームオニオン等の定番フレーバーでも、クリームに乳成分が入るため使えず、自社専用フレーバーの在庫が必要になったり、そもそも美味しく作れないという難しさがある</li>
+      <li>実際に今一番売れているトリュフフレーバーもプラントベースであるため、味の完成度が高く、おいしく作りやすいというのもある</li>
+      <li>価格を下げようと思ったら、工場との共通原料を多くして（ロットメリット）、どうしても譲れないキー原料だけ自社専用としてもらうことが不可欠。また候補となる工場が多いほど、よりマッチする工場を見つけられる可能性が上がる</li>
+    </ul>
+    <p class="arrow-line">将来的にプラントベース商品とそうでない商品の両方を用意し、お客様が選べる状態にできれば、コスパが下がり、より美味しい商品が作れ、工場の選択肢も広がる可能性がある</p>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 15. Part B intro -->
+<div class="slide" data-idx="15" data-accent="blue">
+  <div class="slide-top"><span class="eyebrow">PART B</span><span class="counter">16 / 21</span></div>
+  <div class="slide-body">
+    <div class="part-tag b">検討中・未決定</div>
+    <div class="headline">プランニングチームと<br>まず相談したい内容</div>
+    <div class="sub-headline">各カテゴリーの今後の方向性についての現時点での私見・仮説。社長提案にはまだ含めない。社長への提案の前に、まずプランニングチームと相談したい方向性の仮説。</div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 16. B-1 ベーシックラインの方向性①（クリスピー集約） -->
+<div class="slide" data-idx="16" data-accent="blue">
+  <div class="slide-top"><span class="eyebrow">ベーシックラインの方向性</span><span class="counter">17 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">CRISPYに集約する案</div>
+    <div class="sub-headline">「どちらかに絞る」というより、方向性としての私見</div>
+    <ul class="sec-list">
+      <li><strong>CRISPYに集約</strong>し、SABLE（クッキー）は終売、またはリニューアルする案</li>
+      <li>理由：カテゴリーをまたがず、いったんおつまみでやりきるため</li>
+      <li>CRISPY：おつまみに振り切る方向。追加商品も「おつまみとして人格が立つ」「バイヤーがクリスピーと同じジャンルとして採用できる」商品を投入していく</li>
+    </ul>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 17. B-2 ベーシックラインの方向性②（クッキー昇華案） -->
+<div class="slide" data-idx="17" data-accent="blue">
+  <div class="slide-top"><span class="eyebrow">ベーシックラインの方向性</span><span class="counter">18 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">クッキー（SABLE）の昇華案</div>
+    <div class="sub-headline">終売する場合の代替案として検討</div>
+    <div class="pattern-card"><div class="pattern-num">昇華案</div><strong>プレミアム感のあるお菓子＋健康要素</strong>：すごく美味しくて他にはないプレミアム感のあるお菓子として出し、健康要素を加える（プレミアムラインを強化するタイミングで再投入）</div>
+    <p class="arrow-line">今すぐ着手するか、プレミアムラインの方向性がある程度固まってから着手するかは要検討</p>
+    <div class="photo-row">
+      <div class="photo-group">
+        <div class="photo-group-label">参考イメージ</div>
+        <div class="photo-slots">
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+          <div class="photo-slot" data-slot="" title="クリックして画像を選択"><span class="ph-icon">🖼️</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 18. B-3a プレミアムラインの方向性 -->
+<div class="slide" data-idx="18" data-accent="blue">
+  <div class="slide-top"><span class="eyebrow">プレミアムラインの方向性</span><span class="counter">19 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">プレミアムラインの方向性</div>
+    <div class="sub-headline">現状課題：PLAZAで成功したが、次にどこへ展開すべきかが見えていない。「作ったものを脈絡なく売る」状況になっている。</div>
+    <div class="pattern-card"><div class="pattern-num">1. インバウンド需要を活かしたお土産展開</div>店舗のインバウンド需要を活かし、お土産として販売する</div>
+    <div class="pattern-card"><div class="pattern-num">2. 高価格帯スーパーの輸入菓子ゾーン</div>ナチュラルローソン・PLAZA・成城石井などのハイソなスーパーの、高価格・輸入菓子が置かれている棚を狙う</div>
+    <div class="pattern-card"><div class="pattern-num">3. コンビニの「ちょっといいお菓子ゾーン」</div>シュガーバターの木のような、少量（3〜4枚程度）で300〜400円のお菓子ゾーンを狙う商品。専門店に行くのは大変だが、コンビニで同クオリティが2〜300円台で買えるなら買いたい需要を狙う。現状のケーキラスク・含浸チョコおかきでは物足りないため専用商品が必要。コンビニのプレミアムゾーンは数として一番汎用性があるのでは。KALDIや成城石井でも置けるイメージ</div>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 19. B-3b プレミアムラインの方向性（総括＋カテゴリー図） -->
+<div class="slide" data-idx="19" data-accent="blue">
+  <div class="slide-top"><span class="eyebrow">プレミアムラインの方向性</span><span class="counter">20 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">総括：カテゴリー軸の再整理</div>
+    <div class="summary-box">
+      <div class="quote-label">総括</div>
+      <p>「ベーシックライン／プレミアムライン」で分ける（横軸）よりも、<strong>「おつまみカテゴリー／お菓子カテゴリー」を縦軸</strong>に置いた分け方の方が良いのではないか。</p>
+    </div>
+    <div class="cat-diagram">
+      <div class="cat-box otsumami">
+        <div class="cat-box-label">おつまみカテゴリー</div>
+        <div class="cat-chips">
+          <div class="cat-chip basic">ベーシックライン</div>
+          <div class="cat-chip premium">プレミアムライン</div>
+        </div>
+      </div>
+      <div class="cat-box okashi">
+        <div class="cat-box-label">お菓子カテゴリー</div>
+        <div class="cat-chips">
+          <div class="cat-chip premium">プレミアムライン</div>
+          <div class="cat-chip maybe">ベーシックライン？（要検討）</div>
+        </div>
+      </div>
+    </div>
+    <div class="def-grid">
+      <div class="def-card basic">
+        <div class="dn">ベーシックラインの定義</div>
+        <p>安価で手に取りやすいことが軸。フレーバー・美味しさを訴求し、毎日手に取れる設計。安価に抑える分、自社らしいアレンジ程度にとどまる可能性もある。日常使いのため健康要素もしっかり入れ込む</p>
+      </div>
+      <div class="def-card premium">
+        <div class="dn">プレミアムラインの定義</div>
+        <p>商品自体に「人格」があり、味が本当に美味しいこと。フレーバーを少しこだわった程度ではなく、まったく新しいお菓子・自社でしか出せないレベルの美味しさを目指す</p>
+      </div>
+    </div>
+    <p class="arrow-line">両ラインの違いは「日常的に選ばれる（ベーシック）」か「唯一無二の体験で選ばれる（プレミアム）」か</p>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+<!-- 20. NEXT ACTIONS -->
+<div class="slide" data-idx="20">
+  <div class="slide-top"><span class="eyebrow">次のアクション</span><span class="counter">21 / 21</span></div>
+  <div class="slide-body">
+    <div class="headline">次のアクション</div>
+    <div class="divider"></div>
+    <ul class="checklist">
+      <li>本ドキュメントの内容を確認・修正</li>
+      <li>Part Bの内容をプランニングチームと相談し、方向性を固める</li>
+      <li>営業ヒアリング・商談データを踏まえ、次のステップを決める</li>
+    </ul>
+  </div>
+  <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
+</div>
+
+</div>
+
+<script>
+var EDITABLE = ['.headline','.sub-headline','.title-sub','.title-agenda-item strong','.title-agenda-item span','.eyebrow'].join(',');
+var editMode = false;
+
+function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('editing', editMode);
+  document.querySelectorAll(EDITABLE).forEach(function(el){ el.contentEditable = editMode ? 'true' : 'inherit'; });
+  var BLOCK = ['DIV','P','UL','OL','TABLE','H1','H2','H3','H4','BLOCKQUOTE','SECTION'];
+  document.querySelectorAll('.slide-body div, .slide-body span, .slide-body p, .slide-body li, .slide-body strong, .slide-body td, .slide-body th').forEach(function(el){
+    if (el.classList.contains('photo-slot') || el.closest('.photo-slot')) return;
+    var hasBlock = false;
+    for (var i=0; i<el.children.length; i++) { if (BLOCK.indexOf(el.children[i].tagName) >= 0) { hasBlock = true; break; } }
+    if (!hasBlock && el.textContent.trim()) { el.contentEditable = editMode ? 'true' : 'inherit'; }
+  });
+  var btn = document.getElementById('edit-btn');
+  btn.classList.toggle('on', editMode);
+  btn.textContent = editMode ? '✏️ 編集中' : '✏️ 編集';
+}
+
+var _idb = null;
+// このファイル専用の保存先メモリ（他のHTML資料と保存先を共有しないよう固有の名前にする）
+var IDB_NAME = '2snack-save-teigen-0709';
+function openIdb() {
+  if (_idb) return _idb;
+  _idb = new Promise(function(res, rej) {
+    var r = indexedDB.open(IDB_NAME, 1);
+    r.onupgradeneeded = function(e) { e.target.result.createObjectStore('h'); };
+    r.onsuccess = function(e) { res(e.target.result); };
+    r.onerror = function() { rej(); };
+  });
+  return _idb;
+}
+function idbGet(k) {
+  return openIdb().then(function(db) {
+    return new Promise(function(res) {
+      var req = db.transaction('h','readonly').objectStore('h').get(k);
+      req.onsuccess = function() { res(req.result||null); };
+      req.onerror   = function() { res(null); };
+    });
+  }).catch(function(){ return null; });
+}
+function idbPut(k,v) {
+  return openIdb().then(function(db) {
+    return new Promise(function(res) {
+      var tx = db.transaction('h','readwrite');
+      tx.objectStore('h').put(v,k);
+      tx.oncomplete = res; tx.onerror = res;
+    });
+  }).catch(function(){});
+}
+function showSaveToast(msg) {
+  var t = document.getElementById('save-toast');
+  if (!t) { t=document.createElement('div'); t.id='save-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+function downloadCopy(blob) {
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='社長提案_Snack進め方と全体整理_20260709.html'; a.click();
+}
+
+function saveHTML() {
+  document.querySelectorAll('[contenteditable]').forEach(function(el){ el.removeAttribute('contenteditable'); });
+  document.body.classList.remove('editing');
+  var html = '<!doctype html>\n' + document.documentElement.outerHTML;
+  if (editMode) {
+    document.querySelectorAll(EDITABLE).forEach(function(el){ el.contentEditable='true'; });
+    document.body.classList.add('editing');
+  }
+  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+
+  var inIframe = (function(){ try { return window.self !== window.top; } catch(e){ return true; } })();
+
+  if (!window.showSaveFilePicker || inIframe) {
+    downloadCopy(blob);
+    if (inIframe) showSaveToast('💾 ダウンロードしました（このプレビューでは上書き保存できないため）');
+    else showSaveToast('💾 ダウンロードしました');
+    return;
+  }
+
+  idbGet('fh').then(function(handle) {
+    var getHandle = handle
+      ? handle.requestPermission({mode:'readwrite'}).then(function(p){ return p==='granted' ? handle : null; }).catch(function(){ return null; })
+      : Promise.resolve(null);
+    return getHandle.then(function(h) {
+      if (h) return h;
+      return window.showSaveFilePicker({
+        suggestedName: '社長提案_Snack進め方と全体整理_20260709.html',
+        types: [{description:'HTML', accept:{'text/html':['.html']}}]
+      }).then(function(nh){ return idbPut('fh',nh).then(function(){ return nh; }); });
+    });
+  }).then(function(handle) {
+    return handle.createWritable().then(function(w){ return w.write(blob).then(function(){ return w.close(); }); });
+  }).then(function(){
+    showSaveToast('💾 保存しました');
+  }).catch(function(e){
+    if (e && e.name==='AbortError') return;
+    downloadCopy(blob);
+    showSaveToast('💾 ダウンロードしました（上書き保存できなかったため）');
+  });
+}
+
+(function(){
+  var slides=document.querySelectorAll('.slide'), total=slides.length, cur=0;
+  function go(n){
+    slides[cur].classList.remove('active');
+    cur=Math.max(0,Math.min(n,total-1));
+    slides[cur].classList.add('active');
+    document.getElementById('progress').style.width=((cur+1)/total*100).toFixed(1)+'%';
+    document.querySelectorAll('.prev-btn').forEach(function(b){b.disabled=cur===0;});
+    document.querySelectorAll('.next-btn').forEach(function(b){b.disabled=cur===total-1;});
+  }
+  document.getElementById('deck').addEventListener('click',function(e){
+    var b=e.target.closest('.nav-btn');
+    if(!b||b.disabled)return;
+    if(b.classList.contains('prev-btn'))go(cur-1);
+    if(b.classList.contains('next-btn'))go(cur+1);
+  });
+  document.addEventListener('keydown',function(e){
+    if(editMode) return;
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')go(cur+1);
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(cur-1);
+  });
+  go(0);
+
+  // 写真プレースホルダー：クリックで画像を選択してその場に埋め込む
+  document.querySelectorAll('.photo-slot').forEach(function(el){
+    el.title = 'クリックして画像を選択';
+    el.addEventListener('click', function(){
+      var input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = function(e){
+        var file = e.target.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev){
+          el.innerHTML = '';
+          var img = document.createElement('img');
+          img.src = ev.target.result;
+          el.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    });
+  });
+})();
+</script>
+
+
+<div id="save-toast" class="show">💾 保存しました</div></body></html>
