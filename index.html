@@ -257,6 +257,17 @@ tr:last-child td { border-bottom:none; }
 .checklist li { font-size:.86rem; padding-left:1.6rem; position:relative; }
 .checklist li::before { content:""; position:absolute; left:0; top:.15rem; width:1rem; height:1rem; border:1.5px solid var(--border); border-radius:.3rem; background:var(--card); }
 
+/* ── 開発サイクル図（進め方資料から流用） ── */
+.cycle-wrap { margin-top:1rem; }
+.cycle-label { font-size:.66rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:.5rem; }
+.cycle { display:flex; align-items:stretch; gap:.5rem; }
+.cy-step { flex:1; border:1.5px solid var(--border); border-radius:.7rem; padding:.7rem .8rem; background:var(--card); }
+.cy-num { font-size:.62rem; font-weight:800; color:var(--pink); font-variant-numeric:tabular-nums; margin-bottom:.35rem; }
+.cy-title { font-size:.8rem; font-weight:800; margin-bottom:.25rem; line-height:1.4; }
+.cy-desc { font-size:.68rem; color:var(--text-muted); line-height:1.5; }
+.cy-sep { display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:1rem; flex:0 0 auto; }
+.cy-loop-note { text-align:center; font-size:.7rem; color:var(--text-faint); margin-top:.6rem; }
+
 /* ── TOOLBAR / EDIT MODE ── */
 .toolbar { position:fixed; top:.6rem; right:1.1rem; z-index:200; display:flex; gap:.4rem; }
 .tb-btn { background:#fff; border:1.5px solid var(--border); color:var(--text-muted); padding:.26rem .85rem; border-radius:2rem; font-size:.7rem; cursor:pointer; font-family:var(--font); box-shadow:0 1px 5px rgba(0,0,0,.07); transition:border-color .2s, color .2s, background .2s; }
@@ -373,6 +384,7 @@ body.editing [contenteditable="true"]:focus { outline:2px solid var(--pink); out
   <div class="slide-top"><span class="eyebrow">A-1　Snack全体の進め方</span><span class="counter">4 / 21</span></div>
   <div class="slide-body">
     <div class="headline">役割分担 — 3チーム体制</div>
+    <span class="note-badge">役割分担は仮の設定です</span>
     <div class="sub-headline">特定の一人の判断に頼るのではなく、3チームがそれぞれの持ち場からデータを持ち寄り、開発判断を共有する。</div>
     <div class="trio-wrap">
       <div class="trio">
@@ -394,6 +406,35 @@ body.editing [contenteditable="true"]:focus { outline:2px solid var(--pink); out
       </div>
       <div class="hub-link"></div>
       <div class="hub"><br></div>
+    </div>
+    <div class="cycle-wrap">
+      <div class="cycle-label">この3チームで回す開発サイクル</div>
+      <div class="cycle">
+        <div class="cy-step">
+          <div class="cy-num">01</div>
+          <div class="cy-title">仮説を立てる</div>
+          <div class="cy-desc">誰に・どこで・何を訴求するかを3チームで確定</div>
+        </div>
+        <div class="cy-sep">→</div>
+        <div class="cy-step">
+          <div class="cy-num">02</div>
+          <div class="cy-title">販売・展開</div>
+          <div class="cy-desc">R&amp;Dが商品化、SPSがチャネルに展開</div>
+        </div>
+        <div class="cy-sep">→</div>
+        <div class="cy-step">
+          <div class="cy-num">03</div>
+          <div class="cy-title">実績・声を回収</div>
+          <div class="cy-desc">SPSが数値とヒアリング内容を集約</div>
+        </div>
+        <div class="cy-sep">→</div>
+        <div class="cy-step">
+          <div class="cy-num">04</div>
+          <div class="cy-title">判断・次の一手</div>
+          <div class="cy-desc">Planning Teamが判断基準に沿って継続／改良／終売を決定</div>
+        </div>
+      </div>
+      <div class="cy-loop-note">04 の結果は、次の 01（新しい仮説）にそのままつながる</div>
     </div>
   </div>
   <div class="slide-nav"><button class="nav-btn prev-btn">← 前へ</button><button class="nav-btn next-btn">次へ →</button></div>
@@ -901,6 +942,7 @@ function downloadCopy(blob) {
 function saveHTML() {
   document.querySelectorAll('[contenteditable]').forEach(function(el){ el.removeAttribute('contenteditable'); });
   document.body.classList.remove('editing');
+  // 保存時の表示スライドのactiveクラスをファイルに焼き込まない（開いた瞬間に1枚目と重なって表示される不具合を防ぐ）
   var activeSlideEl = document.querySelector('.slide.active');
   document.querySelectorAll('.slide.active').forEach(function(el){ el.classList.remove('active'); });
   var html = '<!doctype html>\n' + document.documentElement.outerHTML;
